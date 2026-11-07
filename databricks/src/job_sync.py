@@ -3,11 +3,13 @@ from pathlib import Path
 import json
 import re
 import yaml
+from project_validation import validate_workspace_names, is_notebook
 
 JOB_KEYS = ('full','delta','ingestion_full','ingestion_delta')
 
 
 def render_settings(config, key):
+    validate_workspace_names(config['repo_root'])
     path = Path(config['repo_root'])/'databricks/orchestration'/f'{key}.yml'
     text = path.read_text()
     values = {'databricks_project_root':config['workspace_root'],
@@ -23,12 +25,20 @@ def render_settings(config, key):
     if len(keys)!=len(set(keys)):
         raise ValueError('Duplicate task keys')
     seen=set()
+    ancestors = {}
     for task in settings['tasks']:
         if any(d['task_key'] not in seen for d in task.get('depends_on',[])):
             raise ValueError('Tasks must be in dependency order')
+        dependencies = {d['task_key'] for d in task.get('depends_on', [])}
+        ancestors[task['task_key']] = dependencies | set().union(*(ancestors[d] for d in dependencies))
+        for producer in re.findall(r'\{\{tasks\.([A-Za-z0-9_]+)\.values\.', json.dumps(task)):
+            if producer not in ancestors[task['task_key']]:
+                raise ValueError(f'Task value producer {producer} must be an upstream dependency')
         seen.add(task['task_key'])
-        if not Path(task['notebook_task']['notebook_path']+'.py').is_file():
-            raise FileNotFoundError(task['notebook_task']['notebook_path'])
+        relative = Path(task['notebook_task']['notebook_path']).relative_to(config['workspace_root'])
+        source = Path(config['repo_root']) / 'databricks' / (str(relative) + '.py')
+        if not source.is_file() or not is_notebook(source):
+            raise FileNotFoundError(f'Missing source notebook: {source}')
     return settings
 
 

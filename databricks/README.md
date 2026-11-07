@@ -1,6 +1,6 @@
-# Databricks mirror of the Binance Snowflake pipeline
+# Databricks BTCUSDT pipeline
 
-This implementation keeps the Snowflake table names, processing task names and dependency order. Executable notebooks are Databricks `.py` source notebooks; reusable code is under `src`. All transformations use PySpark and Delta Lake. SQL strings are used only for namespace/table DDL, table reset and metadata inspection inside Python.
+This standalone repository contains the Databricks BTCUSDT pipeline. Executable notebooks are Databricks `.py` source notebooks; reusable code is under `src`. All transformations use PySpark and Delta Lake. SQL strings are used only for namespace/table DDL, table reset and metadata inspection inside Python.
 
 ## First deployment
 
@@ -37,17 +37,17 @@ After changes, commit/push, pull the desired GitHub revision into the Databricks
 
 Bronze uses Auto Loader `availableNow` to read headerless CSVs from the managed Volume. Full validates landing first, truncates all seven data tables, then removes the dedicated checkpoint. Its Bronze task reloads all CSVs and creates the checkpoint that subsequent delta loads reuse. Do not delete the checkpoint during ordinary delta operation. A failed full rebuild may leave partial results because resets and table writes are separate commits; rerun full after resolving its failure.
 
-Silver trades append only files not already present by `source_file`, matching Snowflake. Silver summary uses `MERGE` by `symbol, data`, comparing source counts against `quantidade_trades`. Missing summary dates are automatically rebuilt from retained Silver trades. Same-count corrections and partial deletions within an already-seen Silver source file are not detected by these rules; this limitation mirrors the supplied Snowflake implementation.
+Silver trades append only files not already present by `source_file`. Silver summary uses `MERGE` by `symbol, data`, comparing source counts against `quantidade_trades`. Missing summary dates are automatically rebuilt from retained Silver trades. Same-count corrections and partial deletions within an already-seen Silver source file are not detected by these rules; these limitations are unchanged in this review.
 
 SMA50/200 recompute dates affected by changed closing prices or missing Gold rows (D through D+49 / D+199); a value remains null until its complete calendar-day window exists. CVD recomputes from the first missing/changed daily delta, seeded by the preceding retained cumulative value. VWAP updates missing/changed daily volumes. Full rebuilds all four Gold targets. Decimal precision is explicit in Silver and Gold; compare cross-engine averages with an appropriate decimal tolerance.
 
-`ORCHESTRATION.DQ_SUMMARY_BASELINE` is created because it was explicitly requested. The uploaded Snowflake SQL does not currently use this table. Here it records the last **successful summary validation** per symbol/load mode; it does not imply Gold succeeded and is never required before the first full load. It contains scope dates, validation timestamp and job run ID. It is an audit record, not the live retention boundary, so pruning does not rewrite it.
+`ORCHESTRATION.DQ_SUMMARY_BASELINE` is retained from the uploaded Databricks implementation. It records the last **successful summary validation** per symbol/load mode; it does not imply Gold succeeded and is never required before the first full load. It contains scope dates, validation timestamp and job run ID. It is an audit record, not the live retention boundary, so pruning does not rewrite it.
 
 ## Retention and directory structure
 
-There is no Databricks `maintenance` directory. `orchestration/prune_366_days.py` runs only after all four delta Gold branches succeed. It removes complete ZIP/CSV archives and rows strictly older than UTC today minus 366 days, keeping the cutoff date and Auto Loader checkpoint. File removal and writes across Delta tables are not one transaction; retry the prune task if it fails partway. No `VACUUM` is run; physical Delta storage may retain old versions for time travel. Full has no automatic pruning task, matching Snowflake.
+There is no Databricks `maintenance` directory. `orchestration/prune_366_days.py` runs only after all four delta Gold branches succeed. It removes complete ZIP/CSV archives and rows strictly older than UTC today minus 366 days, keeping the cutoff date and Auto Loader checkpoint. File removal and writes across Delta tables are not one transaction; retry the prune task if it fails partway. No `VACUUM` is run; physical Delta storage may retain old versions for time travel. Full has no automatic pruning task.
 
-The mirrored folders are `etl/silver`, `etl/gold`, `quality`, `orchestration`, `setup_init`, `setup_redeploy`, `pipeline_evaluation`, `docs` and `debug_sql` (now Python notebooks). Databricks also retains `historical_data` and the ingestion notebook; `src` contains shared implementations. dbt-only macros/profiles and Snowflake-only integration setup have no Databricks equivalent. Snowflake files remain unchanged in this delivery.
+The active folders are `etl/silver_layer`, `etl/gold_layer`, `quality`, `orchestration`, `setup_init`, `setup_redeploy`, `pipeline_evaluation`, `docs` and `debug_sql` (now Python notebooks). Databricks also retains `historical_data` and the ingestion notebook; `src` contains shared implementations. dbt-only macros/profiles and Snowflake-only integration setup have no Databricks equivalent. This delivery contains no Snowflake pipeline.
 
 ## Evaluation
 

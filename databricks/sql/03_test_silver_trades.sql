@@ -1,1 +1,0 @@
-select count(*) from btc_trading.binance_silver.btcusdt_trades;

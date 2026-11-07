@@ -1,3 +1,49 @@
 {
-  "databricks_project_root": "/Workspace/Users/saradfrz@gmail.com/di-pipe-eng/databricks"
+  "databricks_project_root": "",
+  "databricks": {
+    "catalog": "btc_trading",
+    "schemas": {
+      "bronze": "binance_bronze",
+      "silver": "binance_silver",
+      "gold": "binance_gold",
+      "orchestration": "orchestration"
+    },
+    "volume_name": "landing_zone",
+    "symbol": "BTCUSDT",
+    "retention_days": 366,
+    "max_files_per_trigger": 5,
+    "tables": {
+      "bronze": "bronze_btcusdt_trades_raw",
+      "trades": "btcusdt_trades",
+      "summary": "btcusdt_daily_trade_summary",
+      "sma_50d": "mart_btcusdt_sma_50d",
+      "sma_200d": "mart_btcusdt_sma_200d",
+      "cvd": "mart_btcusdt_cvd",
+      "vwap": "mart_btcusdt_vwap",
+      "baseline": "dq_summary_baseline"
+    },
+    "ingestion": {
+      "full_start_date": "2026-01-01",
+      "sleep_seconds": 1.0,
+      "max_retries": 3,
+      "timeout_seconds": 120
+    },
+    "jobs": {
+      "environment_version": "6",
+      "performance_target": "STANDARD",
+      "ids": {
+        "full": null,
+        "delta": null,
+        "ingestion_full": null,
+        "ingestion_delta": null
+      }
+    },
+    "evaluation": {
+      "cost_start": "2026-11-01T00:00:00Z",
+      "cost_end": "2026-11-08T00:00:00Z",
+      "currency": "USD",
+      "include_exact_counts": false,
+      "workspace_id": null
+    }
+  }
 }

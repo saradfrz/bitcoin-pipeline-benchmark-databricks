@@ -6,9 +6,6 @@ import time
 import zipfile
 from datetime import datetime, timedelta
 from pathlib import Path
-import pyarrow as pa
-import pyarrow.csv as csv
-import pyarrow.parquet as pq
 
 import requests
 
@@ -130,43 +127,6 @@ class BinanceTradeDownloader:
             os.replace(partial, csv_path)
             print(f"Extracted: {csv_path.name}")
             return csv_path
-        finally:
-            partial.unlink(missing_ok=True)
-
-    def convert_to_parquet(self, csv_path):
-        """Convert one headerless Binance Spot trades CSV to Parquet."""
-
-
-        csv_path = Path(csv_path)
-        output_dir = self.csv_dir.parent / "parquet"
-        output_dir.mkdir(exist_ok=True)
-
-        target = output_dir / csv_path.with_suffix(".parquet").name
-        partial = target.with_suffix(".parquet.part")
-
-        column_types = {
-            "trade_id": pa.int64(),
-            "price": pa.decimal128(38, 8),
-            "qty": pa.decimal128(38, 8),
-            "quote_qty": pa.decimal128(38, 8),
-            "time": pa.int64(),
-            "is_buyer_maker": pa.bool_(),
-            "is_best_match": pa.bool_(),
-        }
-
-        try:
-            with csv.open_csv(
-                csv_path,
-                read_options=csv.ReadOptions(column_names=list(column_types)),
-                convert_options=csv.ConvertOptions(column_types=column_types),
-            ) as reader:
-                with pq.ParquetWriter(partial, reader.schema) as writer:
-                    for batch in reader:
-                        writer.write_batch(batch)
-
-            partial.replace(target)
-            print(f"Converted: {target.name}")
-            return target
         finally:
             partial.unlink(missing_ok=True)
 

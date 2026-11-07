@@ -40,7 +40,7 @@ resources:
         - task_key: FULL_RESET_AFTER_LANDING_CHECK
       - task_key: FULL_SILVER_BTCUSDT_TRADES
         notebook_task:
-          notebook_path: ${databricks_project_root}/etl/silver/silver_btcusdt_trades
+          notebook_path: ${databricks_project_root}/etl/silver_layer/silver_btcusdt_trades
           source: WORKSPACE
           base_parameters: {}
         environment_key: Default
@@ -50,7 +50,7 @@ resources:
         - task_key: FULL_BRONZE_BTCUSDT_TRADES_RAW
       - task_key: FULL_SILVER_BTCUSDT_DAILY_TRADE_SUMMARY
         notebook_task:
-          notebook_path: ${databricks_project_root}/etl/silver/silver_btcusdt_daily_trade_summary
+          notebook_path: ${databricks_project_root}/etl/silver_layer/silver_btcusdt_daily_trade_summary
           source: WORKSPACE
           base_parameters: {}
         environment_key: Default
@@ -73,7 +73,7 @@ resources:
         - task_key: FULL_SILVER_BTCUSDT_DAILY_TRADE_SUMMARY
       - task_key: FULL_GOLD_MART_BTCUSDT_SMA_50D
         notebook_task:
-          notebook_path: ${databricks_project_root}/etl/gold/gold_mart_btcusdt_sma_50d
+          notebook_path: ${databricks_project_root}/etl/gold_layer/gold_mart_btcusdt_sma_50d
           source: WORKSPACE
           base_parameters:
             load_mode: full
@@ -84,7 +84,7 @@ resources:
         - task_key: FULL_DQ_AFTER_SUMMARY
       - task_key: FULL_GOLD_MART_BTCUSDT_SMA_200D
         notebook_task:
-          notebook_path: ${databricks_project_root}/etl/gold/gold_mart_btcusdt_sma_200d
+          notebook_path: ${databricks_project_root}/etl/gold_layer/gold_mart_btcusdt_sma_200d
           source: WORKSPACE
           base_parameters:
             load_mode: full
@@ -95,7 +95,7 @@ resources:
         - task_key: FULL_DQ_AFTER_SUMMARY
       - task_key: FULL_GOLD_MART_BTCUSDT_CVD
         notebook_task:
-          notebook_path: ${databricks_project_root}/etl/gold/gold_mart_btcusdt_cvd
+          notebook_path: ${databricks_project_root}/etl/gold_layer/gold_mart_btcusdt_cvd
           source: WORKSPACE
           base_parameters:
             load_mode: full
@@ -106,7 +106,7 @@ resources:
         - task_key: FULL_DQ_AFTER_SUMMARY
       - task_key: FULL_GOLD_MART_BTCUSDT_VWAP
         notebook_task:
-          notebook_path: ${databricks_project_root}/etl/gold/gold_mart_btcusdt_vwap
+          notebook_path: ${databricks_project_root}/etl/gold_layer/gold_mart_btcusdt_vwap
           source: WORKSPACE
           base_parameters:
             load_mode: full
