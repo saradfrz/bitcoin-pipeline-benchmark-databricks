@@ -1,0 +1,33 @@
+resources:
+  jobs:
+    ingestion_delta:
+      name: ingestion_delta
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      tags:
+        project: di-pipe-eng
+        pipeline: ingestion_delta
+      parameters:
+      - name: start_date
+        default: ''
+      - name: end_date
+        default: ''
+      tasks:
+      - task_key: INGESTION_DELTA
+        notebook_task:
+          notebook_path: ${databricks_project_root}/etl/ingestion
+          source: WORKSPACE
+          base_parameters:
+            start_date: '{{job.parameters.start_date}}'
+            end_date: '{{job.parameters.end_date}}'
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+      environments:
+      - environment_key: Default
+        spec:
+          environment_version: ${environment_version}
+          dependencies:
+          - requests
+      performance_target: ${performance_target}

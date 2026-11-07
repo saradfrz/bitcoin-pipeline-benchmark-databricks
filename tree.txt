@@ -1,0 +1,118 @@
+di-pipe-eng/
+├── databricks
+│   ├── data_contracts
+│   │   └── binance_silver__btcusdt_trades.dbquery.ipynb
+│   ├── etl
+│   │   ├── bronze.ipynb
+│   │   ├── gold.ipynb
+│   │   ├── ingestion.ipynb
+│   │   ├── reset_bronze_checkpoint.ipynb
+│   │   └── silver_trades.py
+│   ├── historical_data
+│   │   └── Binance_API_Historical_Data_Ingestion.ipynb
+│   ├── orchestration
+│   │   ├── jobs
+│   │   │   ├── bitcoin_daily.yml
+│   │   │   └── bitcoin_historical.yml
+│   │   └── manage_binance_job.ipynb
+│   ├── sql
+│   │   ├── testes_gold
+│   │   │   ├── 01_test_gold_int_int_btcusdt_sma_50d_daily_input.sql
+│   │   │   ├── 02_test_gold_int_btcusdt_sma_50d_rolling_mean.sql
+│   │   │   ├── 03_test_gold_mart_btcusdt_sma_50d.sql
+│   │   │   ├── 04_test_gold_int_btcusdt_sma_200d_daily_input.sql
+│   │   │   ├── 05_test_gold_int_btcusdt_sma_200d_rolling_mean.sql
+│   │   │   ├── 06_test_gold_mart_btcusdt_sma_200d.sql
+│   │   │   ├── 07_test_gold_int_btcusdt_cvd_daily_input.sql
+│   │   │   ├── 08_test_gold_int_btcusdt_cvd_cumulative_delta.sql
+│   │   │   ├── 09_test_gold_mart_btcusdt_cvd.sql
+│   │   │   └── 10_test_gold_mart_btcusdt_vwap.sql
+│   │   ├── 01_create_catalog_schemas_and_volume.sql
+│   │   ├── 02_test_bronze.sql
+│   │   ├── 03_test_silver_trades.sql
+│   │   └── 04_test_silver_btcusdt_daily_trade_summary.sql
+│   └── src
+│       ├── binance_downloader.py
+│       └── bronze_loader.py
+├── docs
+│   ├── BTCUSDT_na_Binance.md
+│   └── controles_de_qualidade_btcusdt.md
+├── local
+│   └── download_files_locally.py
+├── snowflake
+│   ├── ai
+│   │   ├── etl
+│   │   │   └── gold
+│   │   │       ├── gold_int_btcusdt_cvd_cumulative_delta.sql
+│   │   │       ├── gold_int_btcusdt_cvd_daily_input.sql
+│   │   │       ├── gold_int_btcusdt_sma_200d_daily_input.sql
+│   │   │       ├── gold_int_btcusdt_sma_200d_rolling_mean.sql
+│   │   │       ├── gold_int_btcusdt_sma_50d_daily_input.sql
+│   │   │       ├── gold_int_btcusdt_sma_50d_rolling_mean.sql
+│   │   │       ├── gold_mart_btcusdt_cvd.sql
+│   │   │       ├── gold_mart_btcusdt_sma_200d.sql
+│   │   │       ├── gold_mart_btcusdt_sma_50d.sql
+│   │   │       └── gold_mart_btcusdt_vwap.sql
+│   │   └── README.md
+│   ├── debug_sql
+│   │   ├── snowflake_limitations
+│   │   │   ├── 01_criar_integracao_git.sql
+│   │   │   ├── 02_create_tables.sql
+│   │   │   ├── 03_Configure_outbound_HTTPS_access.sql
+│   │   │   └── snowflake_limitations.txt
+│   │   ├── testes_gold
+│   │   │   ├── 01_test_gold_int_int_btcusdt_sma_50d_daily_input.sql
+│   │   │   ├── 02_test_gold_int_btcusdt_sma_50d_rolling_mean.sql
+│   │   │   ├── 03_test_gold_mart_btcusdt_sma_50d.sql
+│   │   │   ├── 04_test_gold_int_btcusdt_sma_200d_daily_input.sql
+│   │   │   ├── 05_test_gold_int_btcusdt_sma_200d_rolling_mean.sql
+│   │   │   ├── 06_test_gold_mart_btcusdt_sma_200d.sql
+│   │   │   ├── 07_test_gold_int_btcusdt_cvd_daily_input.sql
+│   │   │   ├── 08_test_gold_int_btcusdt_cvd_cumulative_delta.sql
+│   │   │   ├── 09_test_gold_mart_btcusdt_cvd.sql
+│   │   │   └── 10_test_gold_mart_btcusdt_vwap.sql
+│   │   ├── 01_criar_stage_e_camada_bronze.sql
+│   │   ├── 02_test_bronze_.sql
+│   │   ├── 03_test_silver__btcusdt_trades.sql
+│   │   ├── 04_test_silver__btcusdt_daily_trade_summary.sql
+│   │   ├── run_tasks.sql
+│   │   └── tests.sql
+│   ├── etl
+│   │   ├── gold
+│   │   │   ├── gold_mart_btcusdt_cvd.sql
+│   │   │   ├── gold_mart_btcusdt_sma_200d.sql
+│   │   │   ├── gold_mart_btcusdt_sma_50d.sql
+│   │   │   └── gold_mart_btcusdt_vwap.sql
+│   │   ├── silver
+│   │   │   ├── silver_btcusdt_daily_trade_summary.sql
+│   │   │   ├── silver_btcusdt_trades.sql
+│   │   │   └── sources.yml
+│   │   └── bronze_btcusdt_trades_raw.sql
+│   ├── macros
+│   │   └── generate_schema_name.sql
+│   ├── orchestration
+│   │   ├── backfill_summary.sql
+│   │   ├── delta.sql
+│   │   ├── full.sql
+│   │   └── full_summary_to_gold.sql
+│   ├── prompts
+│   │   └── tabelas.txt
+│   ├── quality
+│   │   └── quality_gates.sql
+│   ├── setup_init
+│   │   ├── 01_create_namespaces.sql
+│   │   ├── 02_create_bronze_layer.sql
+│   │   ├── 03_create_silver_layer.sql
+│   │   ├── 04_create_gold_layer.sql
+│   │   ├── 05_deploy_orchestration.sql
+│   │   └── 06_deploy_dbt.sql
+│   ├── setup_redeploy
+│   │   └── 01_deploy_orchestration.sql
+│   ├── dbt_project.yml
+│   ├── profiles.yml
+│   ├── README.md
+│   └── setup.sql
+├── config.json
+├── project_config.py
+├── README.md
+└── tree.txt

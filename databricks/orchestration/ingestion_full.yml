@@ -1,0 +1,33 @@
+resources:
+  jobs:
+    ingestion_full:
+      name: ingestion_full
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      tags:
+        project: di-pipe-eng
+        pipeline: ingestion_full
+      parameters:
+      - name: start_date
+        default: ''
+      - name: end_date
+        default: ''
+      tasks:
+      - task_key: INGESTION_FULL
+        notebook_task:
+          notebook_path: ${databricks_project_root}/historical_data/Binance_API_Historical_Data_Ingestion
+          source: WORKSPACE
+          base_parameters:
+            start_date: '{{job.parameters.start_date}}'
+            end_date: '{{job.parameters.end_date}}'
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+      environments:
+      - environment_key: Default
+        spec:
+          environment_version: ${environment_version}
+          dependencies:
+          - requests
+      performance_target: ${performance_target}

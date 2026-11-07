@@ -1,0 +1,126 @@
+resources:
+  jobs:
+    full:
+      name: full
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      tags:
+        project: di-pipe-eng
+        pipeline: full
+      tasks:
+      - task_key: BINANCE_BITCOIN_FULL
+        notebook_task:
+          notebook_path: ${databricks_project_root}/quality/dq_landing_full
+          source: WORKSPACE
+          base_parameters: {}
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+      - task_key: FULL_RESET_AFTER_LANDING_CHECK
+        notebook_task:
+          notebook_path: ${databricks_project_root}/orchestration/reset_after_landing_check
+          source: WORKSPACE
+          base_parameters:
+            scope: '{{tasks.BINANCE_BITCOIN_FULL.values.scope}}'
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: BINANCE_BITCOIN_FULL
+      - task_key: FULL_BRONZE_BTCUSDT_TRADES_RAW
+        notebook_task:
+          notebook_path: ${databricks_project_root}/etl/bronze_btcusdt_trades_raw
+          source: WORKSPACE
+          base_parameters: {}
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: FULL_RESET_AFTER_LANDING_CHECK
+      - task_key: FULL_SILVER_BTCUSDT_TRADES
+        notebook_task:
+          notebook_path: ${databricks_project_root}/etl/silver/silver_btcusdt_trades
+          source: WORKSPACE
+          base_parameters: {}
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: FULL_BRONZE_BTCUSDT_TRADES_RAW
+      - task_key: FULL_SILVER_BTCUSDT_DAILY_TRADE_SUMMARY
+        notebook_task:
+          notebook_path: ${databricks_project_root}/etl/silver/silver_btcusdt_daily_trade_summary
+          source: WORKSPACE
+          base_parameters: {}
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: FULL_SILVER_BTCUSDT_TRADES
+      - task_key: FULL_DQ_AFTER_SUMMARY
+        notebook_task:
+          notebook_path: ${databricks_project_root}/quality/dq_after_summary
+          source: WORKSPACE
+          base_parameters:
+            scope: '{{tasks.BINANCE_BITCOIN_FULL.values.scope}}'
+            load_mode: full
+            job_run_id: '{{job.run_id}}'
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: FULL_SILVER_BTCUSDT_DAILY_TRADE_SUMMARY
+      - task_key: FULL_GOLD_MART_BTCUSDT_SMA_50D
+        notebook_task:
+          notebook_path: ${databricks_project_root}/etl/gold/gold_mart_btcusdt_sma_50d
+          source: WORKSPACE
+          base_parameters:
+            load_mode: full
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: FULL_DQ_AFTER_SUMMARY
+      - task_key: FULL_GOLD_MART_BTCUSDT_SMA_200D
+        notebook_task:
+          notebook_path: ${databricks_project_root}/etl/gold/gold_mart_btcusdt_sma_200d
+          source: WORKSPACE
+          base_parameters:
+            load_mode: full
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: FULL_DQ_AFTER_SUMMARY
+      - task_key: FULL_GOLD_MART_BTCUSDT_CVD
+        notebook_task:
+          notebook_path: ${databricks_project_root}/etl/gold/gold_mart_btcusdt_cvd
+          source: WORKSPACE
+          base_parameters:
+            load_mode: full
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: FULL_DQ_AFTER_SUMMARY
+      - task_key: FULL_GOLD_MART_BTCUSDT_VWAP
+        notebook_task:
+          notebook_path: ${databricks_project_root}/etl/gold/gold_mart_btcusdt_vwap
+          source: WORKSPACE
+          base_parameters:
+            load_mode: full
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: FULL_DQ_AFTER_SUMMARY
+      environments:
+      - environment_key: Default
+        spec:
+          environment_version: ${environment_version}
+          dependencies:
+          - requests
+          - pyyaml
+          - databricks-sdk
+      performance_target: ${performance_target}

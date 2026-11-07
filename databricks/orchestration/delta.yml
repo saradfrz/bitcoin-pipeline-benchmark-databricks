@@ -1,0 +1,128 @@
+resources:
+  jobs:
+    delta:
+      name: delta
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      tags:
+        project: di-pipe-eng
+        pipeline: delta
+      tasks:
+      - task_key: BINANCE_BITCOIN_DELTA
+        notebook_task:
+          notebook_path: ${databricks_project_root}/quality/dq_landing_delta
+          source: WORKSPACE
+          base_parameters: {}
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+      - task_key: DELTA_BRONZE_BTCUSDT_TRADES_RAW
+        notebook_task:
+          notebook_path: ${databricks_project_root}/etl/bronze_btcusdt_trades_raw
+          source: WORKSPACE
+          base_parameters: {}
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: BINANCE_BITCOIN_DELTA
+      - task_key: DELTA_SILVER_BTCUSDT_TRADES
+        notebook_task:
+          notebook_path: ${databricks_project_root}/etl/silver/silver_btcusdt_trades
+          source: WORKSPACE
+          base_parameters: {}
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: DELTA_BRONZE_BTCUSDT_TRADES_RAW
+      - task_key: DELTA_SILVER_BTCUSDT_DAILY_TRADE_SUMMARY
+        notebook_task:
+          notebook_path: ${databricks_project_root}/etl/silver/silver_btcusdt_daily_trade_summary
+          source: WORKSPACE
+          base_parameters: {}
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: DELTA_SILVER_BTCUSDT_TRADES
+      - task_key: DELTA_DQ_AFTER_SUMMARY
+        notebook_task:
+          notebook_path: ${databricks_project_root}/quality/dq_after_summary
+          source: WORKSPACE
+          base_parameters:
+            scope: '{{tasks.BINANCE_BITCOIN_DELTA.values.scope}}'
+            load_mode: delta
+            job_run_id: '{{job.run_id}}'
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: DELTA_SILVER_BTCUSDT_DAILY_TRADE_SUMMARY
+      - task_key: DELTA_GOLD_MART_BTCUSDT_SMA_50D
+        notebook_task:
+          notebook_path: ${databricks_project_root}/etl/gold/gold_mart_btcusdt_sma_50d
+          source: WORKSPACE
+          base_parameters:
+            load_mode: delta
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: DELTA_DQ_AFTER_SUMMARY
+      - task_key: DELTA_GOLD_MART_BTCUSDT_SMA_200D
+        notebook_task:
+          notebook_path: ${databricks_project_root}/etl/gold/gold_mart_btcusdt_sma_200d
+          source: WORKSPACE
+          base_parameters:
+            load_mode: delta
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: DELTA_DQ_AFTER_SUMMARY
+      - task_key: DELTA_GOLD_MART_BTCUSDT_CVD
+        notebook_task:
+          notebook_path: ${databricks_project_root}/etl/gold/gold_mart_btcusdt_cvd
+          source: WORKSPACE
+          base_parameters:
+            load_mode: delta
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: DELTA_DQ_AFTER_SUMMARY
+      - task_key: DELTA_GOLD_MART_BTCUSDT_VWAP
+        notebook_task:
+          notebook_path: ${databricks_project_root}/etl/gold/gold_mart_btcusdt_vwap
+          source: WORKSPACE
+          base_parameters:
+            load_mode: delta
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: DELTA_DQ_AFTER_SUMMARY
+      - task_key: DELTA_PRUNE_366_DAYS
+        notebook_task:
+          notebook_path: ${databricks_project_root}/orchestration/prune_366_days
+          source: WORKSPACE
+          base_parameters: {}
+        environment_key: Default
+        timeout_seconds: 14400
+        max_retries: 0
+        depends_on:
+        - task_key: DELTA_GOLD_MART_BTCUSDT_SMA_50D
+        - task_key: DELTA_GOLD_MART_BTCUSDT_SMA_200D
+        - task_key: DELTA_GOLD_MART_BTCUSDT_CVD
+        - task_key: DELTA_GOLD_MART_BTCUSDT_VWAP
+      environments:
+      - environment_key: Default
+        spec:
+          environment_version: ${environment_version}
+          dependencies:
+          - requests
+          - pyyaml
+          - databricks-sdk
+      performance_target: ${performance_target}
